@@ -1,0 +1,81 @@
+Project: AetherRuntime
+Full Title: AetherRuntime: A Falsification-First Investigation of Runtime Assurance in the Aether Family
+Subtitle: A Falsification-First Investigation of Monitoring, Detection, Containment, and Recovery in Multi-Agent Software Ecosystems
+Domain: Distributed Systems / Software Engineering / Institutional Analysis
+Subdiscipline: Runtime Assurance, Monitoring, Anomaly Detection, Containment, Halt, Recovery, Multi-Agent Systems
+DOI (Zenodo, v0.1.0): 10.5281/zenodo.24078477
+DOI URL: https://doi.org/10.5281/zenodo.24078477
+Stage: REFERENCE IMPLEMENTATION (v2.0.0)
+Version: 2.0.0
+Paper Version: 0.1.0
+Date: 2026-11-09
+Record ID: AETHERRUNTIME-02
+
+Methodology: Falsification-First
+  - No prior assumption that the gap exists
+  - No prior assumption that AetherRuntime should be a separate project
+  - Every claim tested against failure conditions (F1-F5)
+  - Final structure determined after comparison
+
+Failure Conditions: 5 (F1-F5)
+  - F1: Non-redundancy
+  - F2: Orthogonality to verification
+  - F3: Boundary with governance
+  - F4: Decentralizability
+  - F5: Observable benefit
+
+Runtime Layers: 5
+  - Layer 1: Monitoring
+  - Layer 2: Detection
+  - Layer 3: Containment
+  - Layer 4: Halt
+  - Layer 5: Recovery
+
+Propositions: 2 (with proof sketches; not machine-checked)
+  - P1: Determinism of Local Anomaly Detection
+  - P2: Irreducible Halt Window
+
+Provisional Assessment:
+  - F1: Not falsified (R3, R4, R5 uncovered)
+  - F2: Not falsified (narrowly)
+  - F3: Not falsified (decentralized setting)
+  - F4: Not falsified (with residuals)
+  - F5: Untested
+
+Implementation (v0.1.0):
+  Status: Not built (specification only)
+  Tests: None
+  Experiments: None
+  PyPI: Not yet published
+  Install: pip install aether-runtime (planned)
+
+Open Questions: 20 (Q1-Q20)
+Evaluation Metrics: 9 (M1-M9)
+Baselines: 5 (B1-B5)
+Scenarios: 6 (S1-S6)
+
+Real-World Deployment: Not evaluated
+Peer Review: Not reviewed
+Causal Claims: None (argument only)
+
+Position in Aether Family (sixth functional dimension, provisional):
+  - Dimension 1 (storage): AetherGit — 10.5281/zenodo.23966896
+  - Dimension 2 (integration): AetherFlow — 10.5281/zenodo.23979129
+  - Dimension 3 (verification): AetherProof — 10.5281/zenodo.24013124
+  - Dimension 4 (decentralization): AetherMesh — 10.5281/zenodo.24038038
+  - Dimension 5 (governance): AetherGovern — 10.5281/zenodo.24054524
+  - Dimension 6 (runtime assurance, provisional): AetherRuntime — 10.5281/zenodo.24078477
+
+Repositories:
+  - GitHub (primary): https://github.com/gitdeeper15/aetherruntime
+  - GitLab (mirror): https://gitlab.com/gitdeeper15/aetherruntime
+  - Codeberg (mirror): https://codeberg.org/gitdeeper15/aetherruntime
+  - Bitbucket (mirror): https://bitbucket.org/gitdeeper15/aetherruntime
+  - PyPI: https://pypi.org/project/aether-runtime/ (not yet published)
+  - Zenodo: https://doi.org/10.5281/zenodo.24078477
+  - Website: https://aetherruntime.netlify.app
+
+Author: Samir Baladi
+ORCID: 0009-0003-8903-0029
+Affiliation: Ronin Institute / Rite of Renaissance
+Email: gitdeeper@gmail.com

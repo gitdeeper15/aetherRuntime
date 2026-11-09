@@ -1,0 +1,98 @@
+{
+  "project": "AetherRuntime",
+  "version": "2.0.0",
+  "paper_version": "0.1.0",
+  "date": "2026-11-09",
+  "status": "reference_implementation_with_reproducible_experiments",
+  "record_id": "AETHERRUNTIME-01",
+  "provisional": true,
+  "doi": "10.5281/zenodo.24078477",
+  "doi_url": "https://doi.org/10.5281/zenodo.24078477",
+  "methodology": {
+    "approach": "falsification-first",
+    "no_prior_assumption": true,
+    "failure_conditions": {
+      "F1": "Non-redundancy",
+      "F2": "Orthogonality to verification",
+      "F3": "Boundary with governance",
+      "F4": "Decentralizability",
+      "F5": "Observable benefit"
+    },
+    "requirements": {
+      "R1": "Continuous monitoring",
+      "R2": "Anomaly detection",
+      "R3": "Containment",
+      "R4": "Halt",
+      "R5": "Recovery",
+      "R6": "Partition tolerance"
+    }
+  },
+  "runtime_layers": {
+    "L1_monitoring": {
+      "statement": "Collect telemetry: CPU, memory, network, syscalls, actions",
+      "status": "hypothesis"
+    },
+    "L2_detection": {
+      "statement": "Compare against baseline; flag deviations",
+      "status": "hypothesis"
+    },
+    "L3_containment": {
+      "statement": "Isolate the agent; restrict resources and access",
+      "status": "hypothesis"
+    },
+    "L4_halt": {
+      "statement": "Issue signed halt order; reach quorum; stop the agent",
+      "status": "hypothesis"
+    },
+    "L5_recovery": {
+      "statement": "Reconcile state; replay safe actions; return to normal",
+      "status": "hypothesis"
+    }
+  },
+  "propositions": {
+    "P1_determinism": {
+      "statement": "Local anomaly detection preserves the determinism requirement of AetherMesh (assumption A6).",
+      "status": "proof_sketch",
+      "machine_checked": false
+    },
+    "P2_halt_window": {
+      "statement": "Any decentralized halt protocol leaves an irreducible halt window.",
+      "status": "proof_sketch",
+      "machine_checked": false
+    }
+  },
+  "implementation": {
+    "status": "built",
+    "package_name": "aetherruntime",
+    "version": "0.1.0",
+    "modules": 15,
+    "tests": 60,
+    "experiments": 3,
+    "pypi_published": false
+  },
+  "assessment": {
+    "F1": "not_falsified",
+    "F2": "not_falsified_narrowly",
+    "F3": "not_falsified_decentralized_setting",
+    "F4": "not_falsified_with_residuals",
+    "F5": "untested"
+  },
+  "open_questions": 20,
+  "evaluation_metrics": 9,
+  "baselines": 5,
+  "scenarios": 6,
+  "real_world_deployment": "not_evaluated",
+  "peer_reviewed": false,
+  "causal_claims": "none",
+  "relations": {
+    "aethergit": "storage layer — telemetry and snapshots",
+    "aetherflow": "integration layer — event stream, halt signal",
+    "aetherproof": "verification layer — runtime-checkable specifications",
+    "aethermesh": "decentralization layer — delta replication, determinism predicate",
+    "aethergovern": "governance layer — halt authority"
+  },
+  "license": {
+    "code": "MIT",
+    "docs": "CC-BY-4.0"
+  }
+}

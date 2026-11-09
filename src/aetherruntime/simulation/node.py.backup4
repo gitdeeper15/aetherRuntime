@@ -1,0 +1,338 @@
+"""
+AetherRuntime v2.0.0 — Simulation: Node (Layer 6, simulation only)
+
+This module provides a Node class that represents an agent in the
+simulated network. Each node has:
+    - A unique agent (from models)
+    - A telemetry log (from monitoring)
+    - A baseline registry (from monitoring)
+    - An alert registry (from detection)
+    - A containment manager (from containment)
+    - A halt order registry (from halt)
+    - A snapshot registry (from recovery)
+
+Nodes can:
+    - Collect telemetry
+    - Update baselines
+    - Detect anomalies
+    - Contain themselves
+    - Halt themselves
+    - Recover themselves
+"""
+
+from __future__ import annotations
+
+import random
+import secrets
+from typing import Optional
+
+from ..models import (
+    Agent,
+    AgentStatus,
+    AnomalyAlert,
+    Baseline,
+    BaselineModel,
+    ContainmentLevel,
+    ContainmentPolicy,
+    HaltOrder,
+    RecoveryRecord,
+    Snapshot,
+    TelemetryCategory,
+    TelemetryRecord,
+    create_agent,
+)
+from ..monitoring.telemetry import TelemetryLog, collect
+from ..monitoring.baseline import BaselineRegistry, update_baseline
+from ..detection.alert import AlertRegistry
+from ..detection.classifier import detect
+from ..containment.policy import ContainmentRegistry, contain
+from ..containment.isolation import IsolationManager
+from ..halt.order import HaltOrderRegistry, propose_halt
+from ..halt.quorum import approve_halt, QuorumTracker
+from ..recovery.snapshot import SnapshotRegistry, create_snapshot
+from ..recovery.replay import RecoveryRegistry, recover
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Node
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class Node:
+    """
+    A node in the simulated network.
+
+    Wraps an Agent with all per-node state:
+        - telemetry_log
+        - baseline_registry
+        - alert_registry
+        - containment_registry
+        - isolation_manager
+        - halt_order_registry
+        - snapshot_registry
+        - recovery_registry
+    """
+
+    def __init__(
+        self,
+        agent: Optional[Agent] = None,
+        seed: Optional[int] = None,
+        anomaly_threshold: float = 2.0,
+    ) -> None:
+        # ─── Agent ───
+        if agent is None:
+            public_key = secrets.token_bytes(32)
+            agent = create_agent(public_key=public_key)
+        self.agent = agent
+
+        # ─── Per-node state ───
+        self.telemetry_log = TelemetryLog()
+        self.baseline_registry = BaselineRegistry()
+        self.alert_registry = AlertRegistry()
+        self.containment_registry = ContainmentRegistry()
+        self.isolation_manager = IsolationManager()
+        self.halt_order_registry = HaltOrderRegistry()
+        self.snapshot_registry = SnapshotRegistry()
+        self.recovery_registry = RecoveryRegistry()
+
+        # ─── Configuration ───
+        self.anomaly_threshold = anomaly_threshold
+        self._rng = random.Random(seed)
+
+    # ─── Identity ───
+    @property
+    def node_id(self) -> str:
+        return self.agent.agent_id
+
+    @property
+    def status(self) -> AgentStatus:
+        return self.agent.status
+
+    @status.setter
+    def status(self, value: AgentStatus) -> None:
+        self.agent.status = value
+
+    # ─── Monitoring ───
+    def start(self) -> None:
+        """Start the node (set status to running)."""
+        self.agent.status = AgentStatus.RUNNING
+
+    def collect_telemetry(
+        self,
+        category: TelemetryCategory,
+        value: float,
+        metadata: Optional[dict] = None,
+    ) -> TelemetryRecord:
+        """Collect a telemetry record."""
+        previous = self.telemetry_log.last_timestamp(self.agent.agent_id)
+        record = collect(
+            agent=self.agent,
+            category=category,
+            value=value,
+            previous_timestamp=previous,
+            metadata=metadata,
+        )
+        self.telemetry_log.append(record)
+        return record
+
+    def update_baseline(
+        self,
+        category: TelemetryCategory,
+        model_type: BaselineModel = BaselineModel.MEAN_STD,
+        window_size: int = 10,
+        baseline_window: Optional[int] = None,
+    ) -> Baseline:
+        """
+        Update the baseline for a category.
+
+        Args:
+            category: Telemetry category.
+            model_type: Model type.
+            window_size: Minimum window size (for validation).
+            baseline_window: If provided, use only the FIRST `baseline_window`
+                            telemetry records (assumed normal). Default: all records.
+        """
+        all_records = self.telemetry_log.get(self.agent.agent_id)
+        if baseline_window is not None:
+            all_records = all_records[:baseline_window]
+
+        return update_baseline(
+            agent=self.agent,
+            category=category,
+            model_type=model_type,
+            window_size=window_size,
+            telemetry_records=all_records,
+            existing_baseline=self.baseline_registry.get(
+                self.agent.agent_id, category
+            ),
+        )
+
+    # ─── Detection ───
+    def detect_anomaly(
+        self,
+        record: TelemetryRecord,
+    ) -> Optional[AnomalyAlert]:
+        """Detect an anomaly in a telemetry record."""
+        baseline = self.baseline_registry.get(
+            self.agent.agent_id, record.category
+        )
+        if baseline is None:
+            return None
+        alert = detect(record, baseline, self.anomaly_threshold)
+        if alert is not None:
+            self.alert_registry.put(alert)
+            self.agent.status = AgentStatus.ANOMALOUS
+        return alert
+
+    # ─── Containment ───
+    def contain(
+        self,
+        alert: AnomalyAlert,
+        level: ContainmentLevel = ContainmentLevel.L1_THROTTLE,
+        expiry_seconds: int = 300,
+    ) -> ContainmentPolicy:
+        """Contain the node."""
+        existing = self.containment_registry.get_by_agent(self.agent.agent_id)
+        existing_policy = existing[-1] if existing else None
+        policy = contain(
+            agent=self.agent,
+            alert=alert,
+            level=level,
+            expiry_seconds=expiry_seconds,
+            existing_policy=existing_policy,
+        )
+        self.containment_registry.put(policy)
+        self.isolation_manager.apply(policy)
+        return policy
+
+    def release(self) -> None:
+        """Release the node from containment."""
+        self.isolation_manager.release(self.agent.agent_id)
+
+    # ─── Halt ───
+    def propose_halt(
+        self,
+        target: "Node",
+        reason: str,
+        quorum_threshold: float = 0.67,
+    ) -> HaltOrder:
+        """Propose a halt order for a target node."""
+        signature = secrets.token_bytes(64)
+        order = propose_halt(
+            agent=target.agent,
+            proposer=self.agent,
+            proposer_signature=signature,
+            reason=reason,
+            quorum_threshold=quorum_threshold,
+        )
+        self.halt_order_registry.put(order)
+        return order
+
+    def approve_halt(
+        self,
+        order: HaltOrder,
+        total_authorized_nodes: int,
+    ) -> None:
+        """Approve a halt order."""
+        signature = secrets.token_bytes(64)
+        approve_halt(
+            halt_order=order,
+            approver=self.agent,
+            approver_signature=signature,
+            total_authorized_nodes=total_authorized_nodes,
+        )
+        if order.is_enforced():
+            target_id = order.agent_id
+            if target_id == self.agent.agent_id:
+                self.agent.status = AgentStatus.HALTED
+
+    # ─── Recovery ───
+    def snapshot(self, state: Optional[bytes] = None) -> Snapshot:
+        """Take a snapshot of the node's state."""
+        if state is None:
+            state = f"state-of-{self.agent.agent_id}".encode("utf-8")
+        snapshot = create_snapshot(self.agent, state)
+        self.snapshot_registry.put(snapshot)
+        return snapshot
+
+    def recover(
+        self,
+        halt_order: HaltOrder,
+        snapshot: Snapshot,
+        reauthorizer: "Node",
+    ) -> RecoveryRecord:
+        """Recover the node from a halt."""
+        record = recover(
+            agent=self.agent,
+            halt_order=halt_order,
+            snapshot=snapshot,
+            replay_log=[],
+            reauthorizer=reauthorizer.agent,
+        )
+        self.recovery_registry.put(record)
+        return record
+
+    # ─── Statistics ───
+    def stats(self) -> dict:
+        """Return node statistics."""
+        return {
+            "agent_id": self.agent.agent_id,
+            "status": self.agent.status.value,
+            "telemetry_count": self.telemetry_log.count(self.agent.agent_id),
+            "baseline_count": len(
+                self.baseline_registry.get_all(self.agent.agent_id)
+            ),
+            "alert_count": self.alert_registry.count_by_agent(
+                self.agent.agent_id
+            ),
+            "containment_count": len(
+                self.containment_registry.get_by_agent(self.agent.agent_id)
+            ),
+            "halt_count": len(
+                self.halt_order_registry.get_by_agent(self.agent.agent_id)
+            ),
+            "snapshot_count": self.snapshot_registry.count_by_agent(
+                self.agent.agent_id
+            ),
+            "recovery_count": len(
+                self.recovery_registry.get_by_agent(self.agent.agent_id)
+            ),
+        }
+
+    def __repr__(self) -> str:
+        return (
+            f"Node(id={self.agent.agent_id[:8]}..., "
+            f"status={self.agent.status.value})"
+        )
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Cluster factory
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def create_cluster(
+    n_nodes: int,
+    seed: Optional[int] = None,
+    anomaly_threshold: float = 2.0,
+) -> list[Node]:
+    """
+    Create a cluster of N nodes.
+
+    Args:
+        n_nodes: Number of nodes.
+        seed: Random seed (for reproducibility).
+        anomaly_threshold: Threshold for anomaly detection.
+
+    Returns:
+        List of Node instances.
+    """
+    if n_nodes <= 0:
+        raise ValueError("n_nodes must be > 0")
+    nodes = []
+    for i in range(n_nodes):
+        node_seed = (seed + i) if seed is not None else None
+        node = Node(seed=node_seed, anomaly_threshold=anomaly_threshold)
+        node.start()
+        nodes.append(node)
+    return nodes

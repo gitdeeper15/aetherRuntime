@@ -1,0 +1,67 @@
+{
+  "experiment": "recovery_correctness",
+  "metrics": [
+    "M6"
+  ],
+  "config": {
+    "n_trials": 10,
+    "n_nodes": 3
+  },
+  "results": [
+    {
+      "trial": 0,
+      "verification_result": true,
+      "final_status": "running"
+    },
+    {
+      "trial": 1,
+      "verification_result": true,
+      "final_status": "running"
+    },
+    {
+      "trial": 2,
+      "verification_result": true,
+      "final_status": "running"
+    },
+    {
+      "trial": 3,
+      "verification_result": true,
+      "final_status": "running"
+    },
+    {
+      "trial": 4,
+      "verification_result": true,
+      "final_status": "running"
+    },
+    {
+      "trial": 5,
+      "verification_result": true,
+      "final_status": "running"
+    },
+    {
+      "trial": 6,
+      "verification_result": true,
+      "final_status": "running"
+    },
+    {
+      "trial": 7,
+      "verification_result": true,
+      "final_status": "running"
+    },
+    {
+      "trial": 8,
+      "verification_result": true,
+      "final_status": "running"
+    },
+    {
+      "trial": 9,
+      "verification_result": true,
+      "final_status": "running"
+    }
+  ],
+  "summary": {
+    "n_verified": 10,
+    "n_trials": 10,
+    "M6_correctness": 1.0
+  }
+}

@@ -1,0 +1,83 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+type: software
+title: "AetherRuntime: A Falsification-First Investigation of Runtime Assurance in the Aether Family"
+version: 2.0.0
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.24078477
+    description: "Zenodo version 2.0.0 DOI"
+  - type: doi
+    value: 10.6084/m9.figshare.34955746
+    description: "Figshare preprint DOI"
+  - type: doi
+    value: 10.17605/OSF.IO/KZU7P
+    description: "OSF Preregistration DOI"
+doi: 10.5281/zenodo.24078477
+date-released: 2026-11-09
+license: MIT
+license-url: https://opensource.org/licenses/MIT
+repository-code: https://github.com/gitdeeper15/aetherruntime
+url: https://doi.org/10.5281/zenodo.24078477
+abstract: >
+  AetherRuntime is the sixth functional dimension (provisional) of the
+  Aether family. It investigates whether a runtime-assurance gap genuinely
+  exists in the Aether family, and specifies a five-layer architecture
+  (monitoring, detection, containment, halt, recovery) with two
+  propositions (determinism of local anomaly detection; irreducible halt
+  window). No implementation is claimed. No real-world deployment has
+  been evaluated. F1-F4 are not falsified by argument; F5 is untested.
+keywords:
+  - AetherRuntime
+  - runtime assurance
+  - monitoring
+  - anomaly detection
+  - containment
+  - halt
+  - recovery
+  - multi-agent systems
+  - falsification
+  - decentralized systems
+  - aether family
+authors:
+  - family-names: Baladi
+    given-names: Samir
+    orcid: https://orcid.org/0009-0003-8903-0029
+    email: gitdeeper@gmail.com
+    affiliation: "Ronin Institute / Rite of Renaissance"
+references:
+  - type: software
+    title: "AetherGit: Scalable Source Control for Autonomous AI Agents"
+    authors:
+      - family-names: Baladi
+        given-names: Samir
+    doi: 10.5281/zenodo.23966896
+    date-released: 2026
+  - type: generic
+    title: "AetherFlow: Automated Post-Merge Verification and Dynamic Conflict Resolution in Multi-Agent Programming Environments"
+    authors:
+      - family-names: Baladi
+        given-names: Samir
+    doi: 10.5281/zenodo.23979129
+    date-released: 2026
+  - type: generic
+    title: "AetherProof: Autonomous Formal Verification and Invariant Synthesis for Multi-Agent Software Ecosystems"
+    authors:
+      - family-names: Baladi
+        given-names: Samir
+    doi: 10.5281/zenodo.24013124
+    date-released: 2026
+  - type: software
+    title: "AetherMesh: Decentralized Peer-to-Peer Agent Synchronization and State CRDTs for Autonomous Multi-Agent Systems"
+    authors:
+      - family-names: Baladi
+        given-names: Samir
+    doi: 10.5281/zenodo.24038038
+    date-released: 2026
+  - type: generic
+    title: "AetherGovern: A Falsification-First Investigation of Governance in the Aether Family"
+    authors:
+      - family-names: Baladi
+        given-names: Samir
+    doi: 10.5281/zenodo.24054524
+    date-released: 2026

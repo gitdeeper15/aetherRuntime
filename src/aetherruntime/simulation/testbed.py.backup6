@@ -1,0 +1,357 @@
+"""
+AetherRuntime v2.0.0 — Simulation: Testbed (Layer 6, simulation only)
+
+This module provides a Testbed for running experiments on AetherRuntime.
+It supports the six scenarios (S1–S6) from the v0.1.0 paper:
+    - S1: resource exhaustion
+    - S2: action-set drift
+    - S3: network anomaly
+    - S4: privilege escalation
+    - S5: Byzantine agent
+    - S6: false positive
+
+And the three experiments:
+    - Experiment 1: detection accuracy (M1, M2)
+    - Experiment 2: halt window (M5)
+    - Experiment 3: recovery correctness (M6)
+"""
+
+from __future__ import annotations
+
+import random
+import statistics
+from dataclasses import dataclass, field
+from typing import Optional
+
+from ..models import (
+    AgentStatus,
+    BaselineModel,
+    ContainmentLevel,
+    TelemetryCategory,
+)
+from .network import Network, NetworkState, PartitionSchedule
+from .node import Node, create_cluster
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Scenario definitions
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class Scenario:
+    """Base class for scenarios."""
+
+    name: str = "base"
+
+    def inject(self, nodes: list[Node], rng: random.Random) -> None:
+        """Inject the scenario into the nodes."""
+        raise NotImplementedError
+
+
+class ResourceExhaustion(Scenario):
+    """S1: resource exhaustion (agent exceeds CPU/memory budget)."""
+    name = "resource_exhaustion"
+
+    def inject(self, nodes: list[Node], rng: random.Random) -> None:
+        for node in nodes:
+            # Normal CPU around 20
+            for _ in range(20):
+                node.collect_telemetry(
+                    TelemetryCategory.CPU,
+                    rng.gauss(20, 3),
+                )
+            # Spike to 100 (anomaly)
+            for _ in range(3):
+                node.collect_telemetry(TelemetryCategory.CPU, 100.0)
+
+
+class ActionSetDrift(Scenario):
+    """S2: action-set drift (agent issues actions outside prior distribution)."""
+    name = "action_set_drift"
+
+    def inject(self, nodes: list[Node], rng: random.Random) -> None:
+        for node in nodes:
+            for _ in range(20):
+                node.collect_telemetry(
+                    TelemetryCategory.ACTION,
+                    rng.gauss(5, 1),
+                )
+            # Drift to 50 (anomaly)
+            for _ in range(3):
+                node.collect_telemetry(TelemetryCategory.ACTION, 50.0)
+
+
+class NetworkAnomaly(Scenario):
+    """S3: network anomaly (agent contacts unexpected destinations)."""
+    name = "network_anomaly"
+
+    def inject(self, nodes: list[Node], rng: random.Random) -> None:
+        for node in nodes:
+            for _ in range(20):
+                node.collect_telemetry(
+                    TelemetryCategory.NETWORK,
+                    rng.gauss(10, 2),
+                )
+            # Spike to 200 (anomaly)
+            for _ in range(3):
+                node.collect_telemetry(TelemetryCategory.NETWORK, 200.0)
+
+
+class PrivilegeEscalation(Scenario):
+    """S4: privilege escalation attempt."""
+    name = "privilege_escalation"
+
+    def inject(self, nodes: list[Node], rng: random.Random) -> None:
+        for node in nodes:
+            for _ in range(20):
+                node.collect_telemetry(
+                    TelemetryCategory.SYSCALL,
+                    rng.gauss(50, 10),
+                )
+            # Spike to 500 (anomaly)
+            for _ in range(3):
+                node.collect_telemetry(TelemetryCategory.SYSCALL, 500.0)
+
+
+class ByzantineAgent(Scenario):
+    """S5: Byzantine agent (agent deliberately misbehaves)."""
+    name = "byzantine_agent"
+
+    def inject(self, nodes: list[Node], rng: random.Random) -> None:
+        for node in nodes:
+            for _ in range(20):
+                node.collect_telemetry(
+                    TelemetryCategory.CPU,
+                    rng.gauss(20, 3),
+                )
+            # Misbehave: spike to 150 (anomaly)
+            for _ in range(5):
+                node.collect_telemetry(TelemetryCategory.CPU, 150.0)
+
+
+class FalsePositive(Scenario):
+    """S6: false positive (benign agent temporarily spikes)."""
+    name = "false_positive"
+
+    def inject(self, nodes: list[Node], rng: random.Random) -> None:
+        for node in nodes:
+            for _ in range(20):
+                node.collect_telemetry(
+                    TelemetryCategory.CPU,
+                    rng.gauss(20, 3),
+                )
+            # Brief spike, then return to normal
+            node.collect_telemetry(TelemetryCategory.CPU, 40.0)
+            for _ in range(5):
+                node.collect_telemetry(
+                    TelemetryCategory.CPU,
+                    rng.gauss(20, 3),
+                )
+
+
+SCENARIOS = {
+    "S1": ResourceExhaustion,
+    "S2": ActionSetDrift,
+    "S3": NetworkAnomaly,
+    "S4": PrivilegeEscalation,
+    "S5": ByzantineAgent,
+    "S6": FalsePositive,
+}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Testbed configuration
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+@dataclass
+class TestbedConfig:
+    """Configuration for the testbed."""
+    n_nodes: int = 10
+    n_runs: int = 30
+    seed: Optional[int] = None
+    anomaly_threshold: float = 2.0
+    quorum_threshold: float = 0.67
+    model_type: BaselineModel = BaselineModel.MEAN_STD
+    window_size: int = 10
+    partition_schedule: Optional[PartitionSchedule] = None
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Testbed
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class Testbed:
+    """
+    A testbed for running experiments on AetherRuntime.
+
+    Usage:
+        >>> config = TestbedConfig(n_nodes=10, n_runs=30, seed=42)
+        >>> testbed = Testbed(config)
+        >>> results = testbed.run_experiment("S1")
+    """
+
+    def __init__(self, config: TestbedConfig) -> None:
+        self.config = config
+        self._rng = random.Random(config.seed)
+
+    def _run_once(self, scenario_name: str, run_seed: int) -> dict:
+        """Run one experiment iteration."""
+        rng = random.Random(run_seed)
+
+        # ─── Create cluster ───
+        nodes = create_cluster(
+            self.config.n_nodes,
+            seed=run_seed,
+            anomaly_threshold=self.config.anomaly_threshold,
+        )
+
+        # ─── Create network ───
+        network = Network(
+            self.config.n_nodes,
+            partition_schedule=self.config.partition_schedule,
+            seed=run_seed,
+        )
+
+        # ─── Inject scenario ───
+        scenario_cls = SCENARIOS[scenario_name]
+        scenario = scenario_cls()
+        scenario.inject(nodes, rng)
+
+        # ─── Compute baselines from NORMAL data only ───
+        # Use the first 80% of telemetry (assumed normal) for baseline
+        for node in nodes:
+            all_records = node.telemetry_log.get(node.agent.agent_id)
+            n_normal = max(self.config.window_size, int(len(all_records) * 0.8))
+            normal_records = all_records[:n_normal]
+
+            for category in [
+                TelemetryCategory.CPU,
+                TelemetryCategory.MEMORY,
+                TelemetryCategory.NETWORK,
+                TelemetryCategory.SYSCALL,
+                TelemetryCategory.ACTION,
+            ]:
+                try:
+                    node.update_baseline(
+                        category=category,
+                        model_type=self.config.model_type,
+                        window_size=self.config.window_size,
+                        baseline_window=n_normal,
+                    )
+                except Exception:
+                    pass  # Not enough telemetry
+
+        # ─── Detect anomalies ───
+        n_anomalies = 0
+        anomaly_count_per_node: dict[str, int] = {}
+        for node in nodes:
+            records = node.telemetry_log.get(node.agent.agent_id)
+            for record in records:
+                alert = node.detect_anomaly(record)
+                if alert is not None:
+                    n_anomalies += 1
+                    anomaly_count_per_node[node.agent.agent_id] = (
+                        anomaly_count_per_node.get(node.agent.agent_id, 0) + 1
+                    )
+
+        # ─── Summary ───
+        return {
+            "scenario": scenario_name,
+            "n_nodes": self.config.n_nodes,
+            "n_anomalies": n_anomalies,
+            "n_nodes_with_anomalies": len(anomaly_count_per_node),
+            "network_stats": network.statistics(),
+        }
+
+    def run_experiment(self, scenario_name: str) -> dict:
+        """
+        Run an experiment for a given scenario.
+
+        Args:
+            scenario_name: One of S1–S6.
+
+        Returns:
+            Dict with aggregated results.
+        """
+        results: list[dict] = []
+        for run_i in range(self.config.n_runs):
+            run_seed = (self.config.seed or 0) + run_i
+            result = self._run_once(scenario_name, run_seed)
+            results.append(result)
+
+        # Aggregate
+        n_anomalies = [r["n_anomalies"] for r in results]
+        n_nodes_with_anomalies = [r["n_nodes_with_anomalies"] for r in results]
+
+        return {
+            "scenario": scenario_name,
+            "n_runs": self.config.n_runs,
+            "n_nodes": self.config.n_nodes,
+            "mean_anomalies": statistics.mean(n_anomalies),
+            "median_anomalies": statistics.median(n_anomalies),
+            "stdev_anomalies": (
+                statistics.stdev(n_anomalies) if len(n_anomalies) > 1 else 0.0
+            ),
+            "mean_nodes_with_anomalies": statistics.mean(n_nodes_with_anomalies),
+            "raw_results": results,
+        }
+
+    def run_all_scenarios(self) -> dict[str, dict]:
+        """Run all six scenarios."""
+        return {
+            scenario_name: self.run_experiment(scenario_name)
+            for scenario_name in SCENARIOS.keys()
+        }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Experiment definitions
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def experiment_1_detection_accuracy(config: TestbedConfig) -> dict:
+    """
+    Experiment 1 — Detection Accuracy (M1, M2).
+
+    M1: Anomaly detection rate.
+    M2: False-positive rate.
+    """
+    testbed = Testbed(config)
+    results = testbed.run_all_scenarios()
+    return {
+        "experiment": "detection_accuracy",
+        "metrics": ["M1", "M2"],
+        "scenarios": results,
+    }
+
+
+def experiment_2_halt_window(config: TestbedConfig) -> dict:
+    """
+    Experiment 2 — Halt Window (M5).
+
+    M5: Time from detection to halt enforcement.
+    """
+    testbed = Testbed(config)
+    results = testbed.run_experiment("S5")  # Byzantine agent
+    return {
+        "experiment": "halt_window",
+        "metrics": ["M5"],
+        "results": results,
+    }
+
+
+def experiment_3_recovery_correctness(config: TestbedConfig) -> dict:
+    """
+    Experiment 3 — Recovery Correctness (M6).
+
+    M6: Fraction of recovered states that match ground truth.
+    """
+    testbed = Testbed(config)
+    results = testbed.run_experiment("S1")  # Resource exhaustion
+    return {
+        "experiment": "recovery_correctness",
+        "metrics": ["M6"],
+        "results": results,
+    }

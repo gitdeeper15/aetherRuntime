@@ -1,0 +1,80 @@
+{
+  "experiment": "halt_window",
+  "metrics": [
+    "M5"
+  ],
+  "config": {
+    "n_trials": 10,
+    "n_nodes": 5,
+    "quorum_threshold": 0.67
+  },
+  "results": [
+    {
+      "trial": 0,
+      "approvals": 4,
+      "enforced": true,
+      "window_seconds": 0.000389
+    },
+    {
+      "trial": 1,
+      "approvals": 4,
+      "enforced": true,
+      "window_seconds": 0.000228
+    },
+    {
+      "trial": 2,
+      "approvals": 4,
+      "enforced": true,
+      "window_seconds": 0.000223
+    },
+    {
+      "trial": 3,
+      "approvals": 4,
+      "enforced": true,
+      "window_seconds": 0.000218
+    },
+    {
+      "trial": 4,
+      "approvals": 4,
+      "enforced": true,
+      "window_seconds": 0.000249
+    },
+    {
+      "trial": 5,
+      "approvals": 4,
+      "enforced": true,
+      "window_seconds": 0.000283
+    },
+    {
+      "trial": 6,
+      "approvals": 4,
+      "enforced": true,
+      "window_seconds": 0.000211
+    },
+    {
+      "trial": 7,
+      "approvals": 4,
+      "enforced": true,
+      "window_seconds": 0.000206
+    },
+    {
+      "trial": 8,
+      "approvals": 4,
+      "enforced": true,
+      "window_seconds": 0.000205
+    },
+    {
+      "trial": 9,
+      "approvals": 4,
+      "enforced": true,
+      "window_seconds": 0.000213
+    }
+  ],
+  "summary": {
+    "n_enforced": 10,
+    "mean_window_seconds": 0.0002425,
+    "median_window_seconds": 0.0002205,
+    "min_window_seconds": 0.000205,
+    "max_window_seconds": 0.000389
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "manifest_version": "1.0",
+  "project": {
+    "name": "AetherRuntime",
+    "provisional": true,
+    "full_title": "AetherRuntime: A Falsification-First Investigation of Runtime Assurance in the Aether Family",
+    "subtitle": "A Falsification-First Investigation of Monitoring, Detection, Containment, and Recovery in Multi-Agent Software Ecosystems",
+    "version": "2.0.0",
+    "paper_version": "0.1.0",
+    "type": "research_paper_with_reference_implementation",
+    "status": "reference_implementation_with_reproducible_experiments",
+    "release_date": "2026-11-09",
+    "language": "en",
+    "doi": "10.5281/zenodo.24078477",
+    "doi_url": "https://doi.org/10.5281/zenodo.24078477",
+    "record_id": "AETHERRUNTIME-01",
+    "dimension": "sixth functional dimension (provisional)"
+  },
+  "author": {
+    "name": "Samir Baladi",
+    "role": "Interdisciplinary AI Researcher",
+    "affiliation": "Ronin Institute / Rite of Renaissance",
+    "email": "gitdeeper@gmail.com",
+    "orcid": "0009-0003-8903-0029"
+  },
+  "methodology": {
+    "approach": "falsification-first",
+    "prior_assumption": "none",
+    "failure_conditions": [
+      "F1",
+      "F2",
+      "F3",
+      "F4",
+      "F5"
+    ],
+    "requirements": [
+      "R1",
+      "R2",
+      "R3",
+      "R4",
+      "R5",
+      "R6"
+    ],
+    "final_structure": "determined_after_comparison"
+  },
+  "runtime_layers": [
+    {
+      "id": "L1",
+      "name": "Monitoring",
+      "question": "What is the agent doing?",
+      "status": "hypothesis"
+    },
+    {
+      "id": "L2",
+      "name": "Detection",
+      "question": "Is this behaviour anomalous?",
+      "status": "hypothesis"
+    },
+    {
+      "id": "L3",
+      "name": "Containment",
+      "question": "How do we isolate the agent?",
+      "status": "hypothesis"
+    },
+    {
+      "id": "L4",
+      "name": "Halt",
+      "question": "How do we stop the agent?",
+      "status": "hypothesis"
+    },
+    {
+      "id": "L5",
+      "name": "Recovery",
+      "question": "How do we restore the system?",
+      "status": "hypothesis"
+    }
+  ],
+  "propositions": [
+    {
+      "id": "P1",
+      "name": "Determinism of Local Anomaly Detection",
+      "status": "proof_sketch",
+      "machine_checked": false
+    },
+    {
+      "id": "P2",
+      "name": "Irreducible Halt Window",
+      "status": "proof_sketch",
+      "machine_checked": false
+    }
+  ],
+  "implementation": {
+    "status": "built",
+    "package_name": "aether-runtime",
+    "package_version": "0.1.0",
+    "pypi_published": false,
+    "modules": 15,
+    "tests": 60,
+    "experiments": 3
+  },
+  "assessment": {
+    "F1": "not_falsified",
+    "F2": "not_falsified_narrowly",
+    "F3": "not_falsified_decentralized_setting",
+    "F4": "not_falsified_with_residuals",
+    "F5": "untested"
+  },
+  "links": {
+    "github": "https://github.com/gitdeeper15/aetherruntime",
+    "gitlab": "https://gitlab.com/gitdeeper15/aetherruntime",
+    "codeberg": "https://codeberg.org/gitdeeper15/aetherruntime",
+    "bitbucket": "https://bitbucket.org/gitdeeper15/aetherruntime",
+    "pypi": "https://pypi.org/project/aether-runtime/",
+    "zenodo": "https://doi.org/10.5281/zenodo.24078477",
+    "website": "https://aetherruntime.netlify.app",
+    "related_aethergit": "https://doi.org/10.5281/zenodo.23966896",
+    "related_aetherflow": "https://doi.org/10.5281/zenodo.23979129",
+    "related_aetherproof": "https://doi.org/10.5281/zenodo.24013124",
+    "related_aethermesh": "https://doi.org/10.5281/zenodo.24038038",
+    "related_aethergovern": "https://doi.org/10.5281/zenodo.24054524",
+    "figshare": "https://doi.org/10.6084/m9.figshare.34955746",
+    "osf": "https://doi.org/10.17605/OSF.IO/KZU7P"
+  },
+  "artifacts": {
+    "manuscript": {
+      "path": "PUBLICATION/AetherRuntime_Research_Paper.md",
+      "pages": 33,
+      "version": "0.1.0"
+    },
+    "figures_dir": "docs/figures/",
+    "paper_parts_dir": "PAPER_PARTS/"
+  },
+  "real_world_deployment": false,
+  "peer_reviewed": false,
+  "license": {
+    "code": "MIT",
+    "docs": "CC-BY-4.0"
+  }
+}

@@ -1,0 +1,95 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# AetherRuntime v2.0.0 — Reference Implementation
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# A research article (v0.1.0, DOI: 10.5281/zenodo.24078477) plus a
+# reference implementation (v2.0.0) of the runtime-assurance architecture
+# for the Aether family.
+#
+# 16 modules · 60 tests · 3 reproducible experiments (simulated data).
+# No real-world deployment is evaluated. Not peer reviewed.
+# ═══════════════════════════════════════════════════════════════════════════
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aetherruntime-arch"
+version = "2.0.0"
+description = "Reference implementation of the falsification-first runtime assurance architecture for multi-agent software ecosystems"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Samir Baladi", email = "gitdeeper@gmail.com" }]
+maintainers = [{ name = "Samir Baladi", email = "gitdeeper@gmail.com" }]
+keywords = [
+    "runtime-assurance",
+    "monitoring",
+    "anomaly-detection",
+    "containment",
+    "halt",
+    "recovery",
+    "multi-agent-systems",
+    "falsification",
+    "decentralized-systems",
+    "aether-family",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+    "Topic :: System :: Distributed Computing",
+]
+dependencies = [
+    "cryptography>=41.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "mypy>=1.0",
+    "build>=1.0",
+    "twine>=5.0",
+]
+
+[project.scripts]
+aetherruntime = "aetherruntime.cli:main"
+
+[project.urls]
+Homepage = "https://aetherruntime.netlify.app"
+Documentation = "https://aetherruntime.netlify.app/documentation.html"
+Repository = "https://github.com/gitdeeper15/aetherruntime"
+"Bug Tracker" = "https://github.com/gitdeeper15/aetherruntime/issues"
+"Research Paper" = "https://doi.org/10.5281/zenodo.24078477"
+Zenodo = "https://doi.org/10.5281/zenodo.24078477"
+Figshare = "https://doi.org/10.6084/m9.figshare.34955746"
+OSF = "https://doi.org/10.17605/OSF.IO/KZU7P"
+ORCID = "https://orcid.org/0009-0003-8903-0029"
+"Related Work (AetherGit)" = "https://doi.org/10.5281/zenodo.23966896"
+"Related Work (AetherFlow)" = "https://doi.org/10.5281/zenodo.23979129"
+"Related Work (AetherProof)" = "https://doi.org/10.5281/zenodo.24013124"
+"Related Work (AetherMesh)" = "https://doi.org/10.5281/zenodo.24038038"
+"Related Work (AetherGovern)" = "https://doi.org/10.5281/zenodo.24054524"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v"
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.mypy]
+python_version = "3.9"

@@ -1,0 +1,61 @@
+{
+  "experiment": "detection_accuracy",
+  "metrics": [
+    "M1",
+    "M2"
+  ],
+  "config": {
+    "n_nodes": 5,
+    "n_runs": 3,
+    "seed": 42,
+    "anomaly_threshold": 2.0
+  },
+  "scenarios": {
+    "S1": {
+      "mean_anomalies": 20.333333333333332,
+      "median_anomalies": 21,
+      "stdev_anomalies": 2.0816659994661326,
+      "n_nodes": 5,
+      "n_runs": 3
+    },
+    "S2": {
+      "mean_anomalies": 20.333333333333332,
+      "median_anomalies": 21,
+      "stdev_anomalies": 2.0816659994661326,
+      "n_nodes": 5,
+      "n_runs": 3
+    },
+    "S3": {
+      "mean_anomalies": 20.333333333333332,
+      "median_anomalies": 21,
+      "stdev_anomalies": 2.0816659994661326,
+      "n_nodes": 5,
+      "n_runs": 3
+    },
+    "S4": {
+      "mean_anomalies": 20.333333333333332,
+      "median_anomalies": 21,
+      "stdev_anomalies": 2.0816659994661326,
+      "n_nodes": 5,
+      "n_runs": 3
+    },
+    "S5": {
+      "mean_anomalies": 28.333333333333332,
+      "median_anomalies": 28,
+      "stdev_anomalies": 0.5773502691896257,
+      "n_nodes": 5,
+      "n_runs": 3
+    },
+    "S6": {
+      "mean_anomalies": 7.333333333333333,
+      "median_anomalies": 8,
+      "stdev_anomalies": 1.1547005383792515,
+      "n_nodes": 5,
+      "n_runs": 3
+    }
+  },
+  "summary": {
+    "M1_total_anomalies_s1_s5": 109.67,
+    "M2_false_positive_s6": 7.33
+  }
+}

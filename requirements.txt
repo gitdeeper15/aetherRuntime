@@ -1,0 +1,13 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# AetherRuntime v0.1.0 — Planned runtime dependencies
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# This is the reference implementation (v2.0.0). Dependencies are for
+# the reference implementation.
+#
+# Paper (v0.1.0): https://doi.org/10.5281/zenodo.24078477
+# Package:        https://pypi.org/project/aetherruntime/  (planned)
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Cryptography — Ed25519 signatures for halt orders and telemetry
+cryptography>=41.0
